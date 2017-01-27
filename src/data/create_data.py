@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np
 
 import pickle
-from CreateImages import CTScan
+from create_images import CTScan
 
 
 def create_data(idx, inpfile, outDir, width = 50):
