@@ -4,8 +4,11 @@ from tensorflow.python.framework import dtypes
 
 import pandas as pandas
 
-## Creates batches of image data so we can feed it to the CNN model
+
 class Dataset(object):
+	'''
+	Creates a queue for loading and feeding images to CNN model in batches
+	'''
     def __init__(self, X = None, y = None, filepath = None):
         self.X = X
         self.y = y

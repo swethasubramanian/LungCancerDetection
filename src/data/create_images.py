@@ -63,16 +63,4 @@ class CTScan(object):
         image = self.normalizePlanes(image)
         Image.fromarray(image*255).convert('L').save(filename)
 
-
-
-
-
-
-
-
-
-
-
-
-
         
