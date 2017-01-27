@@ -1,54 +1,21 @@
 LungCancerProject
 ==============================
 
-Creating a model to detect lung nodules using CNN from LUNA16 challenge
+Creating a model to detect lung nodules using CNN from LIDR data
 
 Project Organization
 ------------
+Data Processing Scripts:
+|_notebooks/
+    |__LungCancerDetection.ipynb -> Analysis notebook
+|_src/data/:
+    |__ augment_images.py      -> script to augment training set
+    |__ build_hdf5_datasets.py -> script that concatenates all the images to form a 3D volume. Takes 'train', 'test', 'val' as arguments to generate training set, test set and a validation set.
+    |_create_data.py           -> Generates cropped test, train and validation images. Takes 'train', 'test', 'val' as arguments to generate training, test and a validation images.
+    |__create_images.py        -> A class that contains methods to process and extract images from .mhd data
+    |__test_train_split.py     -> Reads csv files and random splits data into test train annd validation
+  
 
-    ├── LICENSE
-    ├── Makefile           <- Makefile with commands like `make data` or `make train`
-    ├── README.md          <- The top-level README for developers using this project.
-    ├── data
-    │   ├── external       <- Data from third party sources.
-    │   ├── interim        <- Intermediate data that has been transformed.
-    │   ├── processed      <- The final, canonical data sets for modeling.
-    │   └── raw            <- The original, immutable data dump.
-    │
-    ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
-    │
-    ├── models             <- Trained and serialized models, model predictions, or model summaries
-    │
-    ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-    │                         the creator's initials, and a short `-` delimited description, e.g.
-    │                         `1.0-jqp-initial-data-exploration`.
-    │
-    ├── references         <- Data dictionaries, manuals, and all other explanatory materials.
-    │
-    ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-    │   └── figures        <- Generated graphics and figures to be used in reporting
-    │
-    ├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-    │                         generated with `pip freeze > requirements.txt`
-    │
-    ├── src                <- Source code for use in this project.
-    │   ├── __init__.py    <- Makes src a Python module
-    │   │
-    │   ├── data           <- Scripts to download or generate data
-    │   │   └── make_dataset.py
-    │   │
-    │   ├── features       <- Scripts to turn raw data into features for modeling
-    │   │   └── build_features.py
-    │   │
-    │   ├── models         <- Scripts to train models and then use trained models to make
-    │   │   │                 predictions
-    │   │   ├── predict_model.py
-    │   │   └── train_model.py
-    │   │
-    │   └── visualization  <- Scripts to create exploratory and results oriented visualizations
-    │       └── visualize.py
-    │
-    └── tox.ini            <- tox file with settings for running tox; see tox.testrun.org
 
 
 --------
