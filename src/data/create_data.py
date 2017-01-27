@@ -20,7 +20,7 @@ def create_data(idx, outDir, width = 50):
 	'''
 	scan = CTScan(np.asarray(X_data.loc[idx])[0], \
 		np.asarray(X_data.loc[idx])[1:])
-	outfile = outDir  +  str(idx)+ '.tiff'
+	outfile = outDir  +  str(idx)+ '.jpg'
 	scan.save_image(outfile, width)
 
 mode = sys.argv[1]
