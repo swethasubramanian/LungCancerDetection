@@ -5,7 +5,7 @@ from tensorflow.python.framework import dtypes
 import pandas as pandas
 
 
-class Dataset(object):
+class InputData(object):
 	'''
 	Creates a queue for loading and feeding images to CNN model in batches
 	'''

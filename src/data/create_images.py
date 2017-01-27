@@ -10,6 +10,11 @@ import SimpleITK as sitk
 
 
 class CTScan(object):
+	'''
+	A class that allows you to read .mhd header data, crop images and 
+	generate and save cropped images
+	'''
+	
     def __init__(self, filename = None, coords = None):
         self.filename = filename
         self.coords = coords
