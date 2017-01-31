@@ -1,5 +1,6 @@
-## This file splits the data into test, train and validation sets
-
+"""
+ This file splits the data into test, train and validation sets
+"""
 
 import pandas as pd
 import numpy as np
