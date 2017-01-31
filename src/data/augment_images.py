@@ -1,4 +1,6 @@
-## A script to augment minority class
+"""
+ A script to augment minority class in the training set, by flipping images
+"""
 
 from scipy.ndimage import rotate, imread
 from PIL import Image

@@ -1,20 +1,30 @@
 #!/usr/bin/env python
-
+"""
+Builds a HDF5 data set for test, train and validation data
+Run script as python build_hdf5_datasets.py $mode
+where mode can be 'test', 'train', 'val'
+"""
 
 import sys
 
 import numpy as np 
 import pandas as pd 
 
+
+import tflearn
 from tflearn.data_utils import build_hdf5_image_dataset
 
 import pickle
 
-mode = sys.argv[1]
+if len(sys.argv) < 2:
+	raise ValueError('1 argument needed. Specify if you need to generate a train, test or val set')
+else:
+	mode = sys.argv[1]
+	if mode not in ['train', 'test', 'val']:
+		raise ValueError('Argument not recognized. Has to be train, test or val')
 
 X = pd.read_pickle(mode + 'data')
 y = pd.read_pickle(mode + 'labels')
-
 
 
 dataset_file = mode + 'datalabels.txt'
@@ -35,8 +45,9 @@ np.savetxt(dataset_file, data, fmt="%10s %d")
 
 output = mode + 'dataset.h5'
 
-build_hdf5_image_dataset(dataset_file, image_shape=(50, 50),\
- mode='file', output_path=output, categorical_labels=True, normalize=True)
+build_hdf5_image_dataset(dataset_file, image_shape = (50, 50, 1), \
+ mode ='file', output_path = output, categorical_labels = True, normalize = True,
+ grayscale = False)
 
 
 
