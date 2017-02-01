@@ -45,7 +45,7 @@ class CNNModel(object):
 		return img_aug
 
 
-	def input_layer(self, X_images):
+	def input_layer(self, X_images, name):
 		"""
 		Define Input layer
 		"""
@@ -53,10 +53,11 @@ class CNNModel(object):
 		img_aug = self.augmentation()
 		self.network = input_data(shape = [None, X_images.shape[1], X_images.shape[2], X_images.shape[3]],
                      data_preprocessing = img_prep,
-                     data_augmentation = img_aug)
+                     data_augmentation = img_aug,
+                     name = name)
 
 
-	def convolution_layer(self, num_filters, filter_size, activation_type = 'relu'):
+	def convolution_layer(self, num_filters, filter_size, name, activation_type = 'relu', regularizer = 'L1'):
 		"""
 		Creates a 2D-conv layer
 
@@ -67,9 +68,9 @@ class CNNModel(object):
 		activation = takes a string
 		"""
 		self.network = conv_2d(self.network, num_filters,\
-		 filter_size, activation = activation_type)
+		 filter_size, activation = activation_type, regularizer = regularizer, name = name)
 
-	def max_pooling_layer(self, kernel_size):
+	def max_pooling_layer(self, kernel_size, name):
 		"""
 		It is common to periodically insert a Pooling layer in-between successive Conv layers 
 		in a ConvNet architecture. Its function is to progressively reduce the spatial size of
@@ -80,9 +81,9 @@ class CNNModel(object):
 		-----
 		kernel_size: takes an integer
 		"""
-		self.network = max_pool_2d(self.network, kernel_size)
+		self.network = max_pool_2d(self.network, kernel_size, name = name)
 
-	def fully_connected_layer(self, num_units, activation_type):
+	def fully_connected_layer(self, num_units, activation_type, name):
 		"""
 		Neurons in a fully connected layer have full connections to all activations in the previous
 		layer, as seen in regular Neural Networks. Their activations can hence be computed with
@@ -93,9 +94,9 @@ class CNNModel(object):
 		 num_units: an integer representing number of units in the layer
 
 		"""
-		self.network = fully_connected(self.network, num_units, activation= activation_type)
+		self.network = fully_connected(self.network, num_units, activation= activation_type, name = name)
 
-	def dropout_layer(self, prob = 0.5):
+	def dropout_layer(self, name, prob = 0.5):
 		"""
 		args
 		------
@@ -104,8 +105,7 @@ class CNNModel(object):
 		"""
 		if (prob > 1) or (prob < 0):
 			raise ValueError('Probability values should e between 0 and 1')
-
-		self.network = dropout(self.network, prob)
+		self.network = dropout(self.network, prob, name = name)
 
 	def define_network2(self, X_images):
 		self.network = input_data(shape=[None, 50, 50, 1], name='input')
@@ -134,15 +134,15 @@ class CNNModel(object):
 		X_images: A HDF5 datasets representing input layer
 
 		"""
-		self.input_layer(X_images)
-		self.convolution_layer(64, 3, 'relu') # 50 filters, with size 3
-		self.max_pooling_layer(2) # downsamples spatial size by 2
-		self.convolution_layer(128,3,'relu')
-		self.convolution_layer(256,3, 'relu')
-		self.max_pooling_layer(2)
-		self.fully_connected_layer(512, 'relu')
-		self.dropout_layer(0.5)
-		self.fully_connected_layer(2, 'softmax')
+		self.input_layer(X_images, name = 'inp1')
+		self.convolution_layer(64, 3, 'conv1', 'relu') # 50 filters, with size 3
+		self.max_pooling_layer(2, 'mp1') # downsamples spatial size by 2
+		self.convolution_layer(128, 3, 'conv2', 'relu')
+		self.convolution_layer(256, 3, 'conv3', 'relu')
+		self.max_pooling_layer(2, 'mp2')
+		self.fully_connected_layer(512,'relu', 'fl1')
+		self.dropout_layer('dp1', 0.5)
+		self.fully_connected_layer(2, 'softmax', 'fl2')
 
 		self.network = regression(self.network, optimizer = 'adam',\
 		 loss = 'categorical_crossentropy', learning_rate = 0.001)
@@ -164,7 +164,7 @@ class CNNModel(object):
 		self.convolution_layer(64,3, 'relu')
 		self.max_pooling_layer(2)
 		self.fully_connected_layer(512, 'relu')
-		self.dropout_layer(0.5)
+		self.dropout_layer('dp1', 0.5)
 		self.fully_connected_layer(2, 'softmax')
 
 		self.network = regression(self.network, optimizer = 'adam',\

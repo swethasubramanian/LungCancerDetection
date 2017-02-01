@@ -1,3 +1,7 @@
+"""
+Trains a CNN model using tflearn wrapper for tensorflow
+"""
+
 
 import tflearn
 import h5py
@@ -20,12 +24,12 @@ Y_val_labels = h5f2['Y']
 convnet  = CNNModel()
 network = convnet.define_network1(X_train_images)
 model = tflearn.DNN(network, tensorboard_verbose=0,\
-		 checkpoint_path='nodule2-classifier.tfl.ckpt')
+		 checkpoint_path='nodule3-classifier.tfl.ckpt')
 model.fit(X_train_images, Y_train_labels, n_epoch = 100, shuffle=True,\
 			validation_set = (X_val_images, Y_val_labels), show_metric = True,\
-			batch_size = 96, snapshot_epoch = True, run_id = 'nodule2-classifier')
-model.save("nodule2-classifier.tfl")
-print("Network trained and saved as nodule-classifier2.tfl!")
+			batch_size = 96, snapshot_epoch = True, run_id = 'nodule3-classifier')
+model.save("nodule3-classifier.tfl")
+print("Network trained and saved as nodule-classifier3.tfl!")
 
 h5f.close()
 h5f2.close()
