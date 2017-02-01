@@ -12,9 +12,42 @@ import pandas as pd
 import numpy as np 
 import h5py
 from sklearn.metrics import roc_curve, auc, confusion_matrix
+import itertools
 
 import matplotlib.pyplot as plt
 
+def plot_confusion_matrix(cm, classes,
+                          normalize=False,
+                          title='Confusion matrix',
+                          cmap=plt.cm.Blues):
+    """
+    This function prints and plots the confusion matrix.
+    Normalization can be applied by setting `normalize=True`.
+    """
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        print("Normalized confusion matrix")
+    else:
+        print('Confusion matrix, without normalization')
+
+    print(cm)
+
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, cm[i, j],
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
 
 
 h5f2 = h5py.File('../data/test.h5', 'r')
@@ -39,6 +72,7 @@ score = model.evaluate(X_test_images, Y_test_labels)
 fpr, tpr, thresholds = roc_curve(Y_test_labels[:,1], predictions[:,1], pos_label=1)
 roc_auc = auc(fpr, tpr)
 cm = confusion_matrix(Y_test_labels[:,1], label_predictions[:,1])
+print Y_test_labels[:,1].sum(), label_predictions[:,1].sum()
 TN = cm[0][0]
 FP = cm[0][1]
 FN = cm[1][0]
@@ -64,8 +98,17 @@ plt.axis([0, 1, 0, 1])
 plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
 plt.legend(loc="lower right")
-plt.savefig('roc.png', bbox_inches='tight')
+plt.savefig('roc1.png', bbox_inches='tight')
+
+
+# Plot non-normalized confusion matrix
+plt.figure()
+plot_confusion_matrix(cm, classes=['no-nodule', 'nodule'],
+                      title='Confusion matrix')
+plt.savefig('confusion_matrix.png', bbox_inches='tight')
+
 plt.show()
+
 
 
 

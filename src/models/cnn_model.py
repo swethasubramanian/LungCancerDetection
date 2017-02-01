@@ -67,7 +67,7 @@ class CNNModel(object):
 		activation = takes a string
 		"""
 		self.network = conv_2d(self.network, num_filters,\
-		 filter_size, activation = activation_type, regularizer="L2")
+		 filter_size, activation = activation_type)
 
 	def max_pooling_layer(self, kernel_size):
 		"""
