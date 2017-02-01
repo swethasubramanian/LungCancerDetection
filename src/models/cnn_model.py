@@ -8,6 +8,7 @@ from tflearn.layers.conv import conv_2d, max_pool_2d
 from tflearn.layers.estimator import regression
 from tflearn.data_preprocessing import ImagePreprocessing
 from tflearn.data_augmentation import ImageAugmentation
+from tflearn.layers.normalization import local_response_normalization
 
 import tensorflow as tf
 
@@ -65,7 +66,8 @@ class CNNModel(object):
 		filter_size = takes an integer
 		activation = takes a string
 		"""
-		self.network = conv_2d(self.network, num_filters, filter_size, activation = activation_type)
+		self.network = conv_2d(self.network, num_filters,\
+		 filter_size, activation = activation_type, regularizer="L2")
 
 	def max_pooling_layer(self, kernel_size):
 		"""
@@ -105,7 +107,47 @@ class CNNModel(object):
 
 		self.network = dropout(self.network, prob)
 
+	def define_network2(self, X_images):
+		self.network = input_data(shape=[None, 50, 50, 1], name='input')
+		self.network = conv_2d(self.network, 50, 3, activation='relu', regularizer="L2")
+		self.network = max_pool_2d(self.network, 2)
+		self.network = local_response_normalization(self.network)
+		self.network = conv_2d(self.network, 64, 3, activation='relu', regularizer="L2")
+		self.network = max_pool_2d(self.network, 2)
+		self.network = local_response_normalization(self.network)
+		self.network = fully_connected(self.network, 128, activation='tanh')
+		self.network = dropout(self.network, 0.8)
+		self.network = fully_connected(self.network, 256, activation='tanh')
+		self.network = dropout(self.network, 0.8)
+		self.network = fully_connected(self.network, 10, activation='softmax')
+		self.network = regression(self.network, optimizer='adam', learning_rate=0.01,
+			loss='categorical_crossentropy', name='target')
+		return self.network
 
+
+
+	def define_network1(self, X_images):
+		"""
+		Creates a regression network
+		Args:
+		-------
+		X_images: A HDF5 datasets representing input layer
+
+		"""
+		self.input_layer(X_images)
+		self.convolution_layer(64, 3, 'relu') # 50 filters, with size 3
+		self.max_pooling_layer(2) # downsamples spatial size by 2
+		self.convolution_layer(128,3,'relu')
+		self.convolution_layer(256,3, 'relu')
+		self.max_pooling_layer(2)
+		self.fully_connected_layer(512, 'relu')
+		self.dropout_layer(0.5)
+		self.fully_connected_layer(2, 'softmax')
+
+		self.network = regression(self.network, optimizer = 'adam',\
+		 loss = 'categorical_crossentropy', learning_rate = 0.001)
+
+		return self.network
 
 	def define_network(self, X_images):
 		"""
