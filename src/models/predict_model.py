@@ -1,5 +1,5 @@
 """
-A script to train a conv net model using tflearn wrapper for tensorflow
+A script to predict nodules using conv net model and for analysis of results
 """
 
 import tflearn
@@ -65,8 +65,10 @@ model.load("nodule-classifier.tfl")
 #predictions, score = convnet.predict_results(X_test_images, Y_test_labels)
 
 predictions = np.vstack(model.predict(X_test_images[:,:,:,:]))
-label_predictions = np.vstack(model.predict_label(X_test_images[:,:,:,:]))
+#label_predictions = np.vstack(model.predict_label(X_test_images[:,:,:,:]))
 score = model.evaluate(X_test_images, Y_test_labels)
+label_predictions = np.zeros_like(predictions)
+label_predictions[np.arange(len(predictions)), predictions.argmax(1)] = 1
 
 ## ROC
 fpr, tpr, thresholds = roc_curve(Y_test_labels[:,1], predictions[:,1], pos_label=1)

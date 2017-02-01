@@ -1,5 +1,5 @@
 """
-A script to train a conv net model using tflearn wrapper for tensorflow
+A conv net model using tflearn wrapper for tensorflow
 """
 
 import tflearn
