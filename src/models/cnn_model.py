@@ -109,7 +109,10 @@ class CNNModel(object):
 
 	def define_network(self, X_images):
 		"""
-		Create the network
+		Creates a regression network
+		Args:
+		-------
+		X_images: A HDF5 datasets representing input layer
 
 		"""
 		self.input_layer(X_images)
@@ -125,31 +128,7 @@ class CNNModel(object):
 		self.network = regression(self.network, optimizer = 'adam',\
 		 loss = 'categorical_crossentropy', learning_rate = 0.001)
 
-
-	def define_model(self):
-		self.model = tflearn.DNN(self.network, tensorboard_verbose=0,\
-		 checkpoint_path='nodule-classifier.tfl.ckpt')
+		return self.network
 
 
-	def train_model(self, X_train, Y_train, X_val, Y_val):
-		"""
-		"""
-		self.model.fit(X_train, Y_train, n_epoch = 70, shuffle=True,\
-			validation_set = (X_val, Y_val), show_metric = True,\
-			batch_size = 96, snapshot_epoch = True, run_id = 'nodule-classifier')
-		self.model.save("nodule-classifier.tfl")
-		print("Network trained and saved as nodule-classifier.tfl!")
-
-
-	def predict_results(self, X_test, Y_test):
-		"""
-		"""
-		self.model.load("nodule-classifier.tfl")
-		predictions = self.model.predict(X_test[:,:,:,:])
-		score = self.model.evaluate(X_test, Y_test)
-		return predictions, score
-
-
-
-
-
+	

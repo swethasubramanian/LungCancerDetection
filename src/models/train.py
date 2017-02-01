@@ -18,12 +18,12 @@ Y_val_labels = h5f2['Y']
 
 ## Model definition
 convnet  = CNNModel()
-convnet.define_network(X_train_images)
-convnet.define_model()
-convnet.train_model(X_train_images, Y_train_labels, X_val_images, Y_val_labels)
-
-
-# Save model when training is complete to a file
+network = convnet.define_network(X_train_images)
+model = tflearn.DNN(network, tensorboard_verbose=0,\
+		 checkpoint_path='nodule-classifier.tfl.ckpt')
+model.fit(X_train_images, Y_train_labels, n_epoch = 100, shuffle=True,\
+			validation_set = (X_val_images, Y_val_labels), show_metric = True,\
+			batch_size = 96, snapshot_epoch = True, run_id = 'nodule-classifier')
 model.save("nodule-classifier.tfl")
 print("Network trained and saved as nodule-classifier.tfl!")
 
