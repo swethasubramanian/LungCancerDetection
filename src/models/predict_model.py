@@ -58,8 +58,8 @@ Y_test_labels = h5f2['Y']
 convnet  = CNNModel()
 network = convnet.define_network(X_test_images)
 model = tflearn.DNN(network, tensorboard_verbose=0,\
-		 checkpoint_path='nodule-classifier.tfl.ckpt')
-model.load("nodule-classifier.tfl")
+		 checkpoint_path='nodule3-classifier.tfl.ckpt')
+model.load("nodule3-classifier.tfl")
 
 #convnet.define_model()
 #predictions, score = convnet.predict_results(X_test_images, Y_test_labels)
@@ -110,6 +110,9 @@ plot_confusion_matrix(cm, classes=['no-nodule', 'nodule'],
 plt.savefig('confusion_matrix.png', bbox_inches='tight')
 
 plt.show()
+
+
+
 
 
 

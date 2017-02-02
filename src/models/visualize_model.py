@@ -22,8 +22,8 @@ Y_test_labels = h5f2['Y']
 convnet  = CNNModel()
 network = convnet.define_network(X_test_images)
 model = tflearn.DNN(network, tensorboard_verbose=0,\
-		 checkpoint_path='nodule-classifier.tfl.ckpt')
-model.load("nodule-classifier.tfl")
+		 checkpoint_path='nodule3-classifier.tfl.ckpt')
+model.load("nodule3-classifier.tfl")
 
-print tflearn.variables.get_all_variables()
+print tflearn.variables.get_()
 
