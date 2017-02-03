@@ -133,7 +133,7 @@ class CNNModel(object):
 		if mode is visual: then it returns intermediate layers as well
 
 		"""
-		inp_layer = self.input_layer(X_images, name = 'inp1')
+		inp_layer = self.input_layer(X_images, name = 'inpu1')
 		conv_layer_1 = self.convolution_layer(32, 3, 'conv1', 'relu', 'L2') # 50 filters, with size 3
 		mp_layer_1 = self.max_pooling_layer(2, 'mp1') # downsamples spatial size by 2
 		conv_layer_2 = self.convolution_layer(64, 3, 'conv2', 'relu', 'L2')

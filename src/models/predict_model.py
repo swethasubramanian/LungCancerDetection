@@ -16,17 +16,18 @@ import itertools
 
 import matplotlib.pyplot as plt
 
+
 def plot_confusion_matrix(cm, classes,
                           normalize=False,
                           title='Confusion matrix',
-                          cmap=plt.cm.Blues):
+                          cmap=plt.cm.Purples):
     """
     This function prints and plots the confusion matrix.
     Normalization can be applied by setting `normalize=True`.
     """
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(title)
-    plt.colorbar()
+    #plt.colorbar()
     tick_marks = np.arange(len(classes))
     plt.xticks(tick_marks, classes, rotation=45)
     plt.yticks(tick_marks, classes)
@@ -46,6 +47,7 @@ def plot_confusion_matrix(cm, classes,
                  color="white" if cm[i, j] > thresh else "black")
 
     plt.tight_layout()
+    #plt.grid('off')
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
 
@@ -91,12 +93,13 @@ print TP, FP, FN, TN
 plt.figure()
 lw = 2
 plt.plot(fpr, tpr, color='darkorange',
-         lw=lw, label='ROC curve (area = %0.2f)' % roc_auc)
+         lw=lw, label='(AUC = %0.2f)' % roc_auc)
 plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
 #plt.xlim([0.0, 1.0])
 #plt.ylim([0.0, 1.0])
-plt.axis('tight')
-plt.axis([0, 1, 0, 1])
+#plt.axis('tight')
+plt.axis('equal')
+#plt.axis([0, 1, 0, 1])
 plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
 plt.legend(loc="lower right")
