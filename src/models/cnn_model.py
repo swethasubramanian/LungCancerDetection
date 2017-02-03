@@ -58,6 +58,7 @@ class CNNModel(object):
                      data_preprocessing = img_prep,
                      data_augmentation = img_aug,
                      name = name)
+		return self.network
 
 
 	def convolution_layer(self, num_filters, filter_size, name, activation_type = 'relu', regularizer = None):
@@ -74,6 +75,7 @@ class CNNModel(object):
 		"""
 		self.network = conv_2d(self.network, num_filters,\
 		 filter_size, activation = activation_type, regularizer = regularizer, name = name)
+		return self.network
 
 	def max_pooling_layer(self, kernel_size, name):
 		"""
@@ -88,6 +90,7 @@ class CNNModel(object):
 		name : a str representing name of the layer
 		"""
 		self.network = max_pool_2d(self.network, kernel_size, name = name)
+		return self.network
 
 	def fully_connected_layer(self, num_units, activation_type, name):
 		"""
@@ -100,7 +103,9 @@ class CNNModel(object):
 		 num_units: an integer representing number of units in the layer
 
 		"""
-		self.network = fully_connected(self.network, num_units, activation= activation_type, name = name)
+		self.network = fully_connected(self.network, num_units,\
+		 activation= activation_type, name = name)
+		return self.network
 
 	def dropout_layer(self, name, prob = 0.5):
 		"""
@@ -112,9 +117,10 @@ class CNNModel(object):
 		if (prob > 1) or (prob < 0):
 			raise ValueError('Probability values should e between 0 and 1')
 		self.network = dropout(self.network, prob, name = name)
+		return self.network
 
 
-	def define_network(self, X_images):
+	def define_network(self, X_images, mode = 'testtrain'):
 		"""
 		Creates a regression network
 		Args:
@@ -124,21 +130,30 @@ class CNNModel(object):
 		Returns
 		A CNN network
 
+		if mode is visual: then it returns intermediate layers as well
+
 		"""
-		self.input_layer(X_images, name = 'inp1')
-		self.convolution_layer(50, 3, 'conv1', 'relu', 'L1') # 50 filters, with size 3
-		self.max_pooling_layer(2, 'mp1') # downsamples spatial size by 2
-		self.convolution_layer(64, 3, 'conv2', 'relu', 'L1')
-		self.convolution_layer(64, 3, 'conv3', 'relu', 'L1')
-		self.max_pooling_layer(2, 'mp2')
-		self.fully_connected_layer(512,'relu', 'fl1')
-		self.dropout_layer('dp1', 0.5)
-		self.fully_connected_layer(2, 'softmax', 'fl2')
+		inp_layer = self.input_layer(X_images, name = 'inp1')
+		conv_layer_1 = self.convolution_layer(32, 3, 'conv1', 'relu', 'L2') # 50 filters, with size 3
+		mp_layer_1 = self.max_pooling_layer(2, 'mp1') # downsamples spatial size by 2
+		conv_layer_2 = self.convolution_layer(64, 3, 'conv2', 'relu', 'L2')
+		conv_layer_3 = self.convolution_layer(64, 3, 'conv3', 'relu', 'L2')
+		mp_layer_2 = self.max_pooling_layer(2, 'mp2')
+		fully_connected_layer_1 = self.fully_connected_layer(512,'relu', 'fl1')
+		dropout_layer_1 = self.dropout_layer('dp1', 0.6)
+		softmax_layer  = self.fully_connected_layer(2, 'softmax', 'fl2')
 
 		self.network = regression(self.network, optimizer = 'adam',\
 		 loss = 'categorical_crossentropy', learning_rate = 0.001)
+		
+		if mode == 'testtrain':
+			return self.network
+		if mode == 'visual':
+			return inp_layer, conv_layer_1, mp_layer_1, conv_layer_2, conv_layer_3, mp_layer_2,\
+			fully_connected_layer_1, dropout_layer_1, softmax_layer, self.network
 
-		return self.network
+
+
 
 
 

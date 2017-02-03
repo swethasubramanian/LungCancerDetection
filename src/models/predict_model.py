@@ -59,7 +59,7 @@ convnet  = CNNModel()
 network = convnet.define_network(X_test_images)
 model = tflearn.DNN(network, tensorboard_verbose=0,\
 		 checkpoint_path='nodule3-classifier.tfl.ckpt')
-model.load("nodule3-classifier.tfl")
+model.load("nodule2-classifier.tfl")
 
 #convnet.define_model()
 #predictions, score = convnet.predict_results(X_test_images, Y_test_labels)

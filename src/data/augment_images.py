@@ -18,7 +18,6 @@ y_train = pd.read_pickle('trainlabels')
 augIndexes = X_train[y_train == 1].index
 
 
-
 def augment_positive_cases(idx):
 	inp = imread('train/image_' + str(idx)+ '.jpg')
 	# Rotate by 90
