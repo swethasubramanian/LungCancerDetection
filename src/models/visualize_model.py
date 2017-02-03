@@ -57,15 +57,15 @@ def plot_layers(layer, model, inp, idx):
 	
 	nfilt = yhat_1.shape[2]
 
-	mosaic = create_mosaic(yhat_1, 4, nfilt/4)
+	mosaic = create_mosaic(yhat_1, nfilt/4, 4)
 	plt.figure(figsize = (12,12))
 	plt.imshow(mosaic, cmap = 'magma')
 	plt.axis('off')
-	plt.savefig('conv_layer_' + str(idx)+'.png', bbox_inches='tight')
+	plt.savefig('conv1_layer_' + str(idx)+'.png', bbox_inches='tight')
 	#plt.show()
 
 ### Plot layer
-filename = '../data/test/image_315896.jpg'
+filename = '../data/test/image_14188.jpg'
 inp = imread(filename).astype('float32')
 
 
@@ -76,6 +76,7 @@ fully_connected_layer_1, dropout_layer_1, softmax_layer, network =\
 model = tflearn.DNN(network, tensorboard_verbose=0,\
 		 checkpoint_path='nodule3-classifier.tfl.ckpt')
 model.load("nodule2-classifier.tfl")
+print model.predict(inp.reshape(-1, 50, 50, 1))
 
 layers_to_be_plotted = [conv_layer_1, conv_layer_2, conv_layer_3]
 #plot_layers(conv_layer_1, model, inp)
