@@ -16,6 +16,46 @@ import itertools
 
 import matplotlib.pyplot as plt
 
+#from visualize_model import create_mosaic, plot_layers
+
+def create_mosaic(image, nrows, ncols):
+  """
+  Tiles all the layers in nrows x ncols
+  Args:
+  ------
+  image = 3d numpy array of M * N * number of filters dimensions
+  nrows = integer representing number of images in a row
+  ncol = integer representing number of images in a column
+
+  returns formatted image
+  """
+
+  M = image.shape[1]
+  N = image.shape[2]
+
+  npad = ((0,0), (1,1), (1,1))
+  image = np.pad(image, pad_width = npad, mode = 'constant',\
+    constant_values = 0)
+  M += 2
+  N += 2
+  image = image.reshape(nrows, ncols, M, N)
+  image = np.transpose(image, (0,2,1,3))
+  image = image.reshape(M*nrows, N*ncols)
+  return image
+
+
+def format_image(image, num_images):
+  """
+  Formats images
+  """
+  idxs = np.random.choice(image.shape[0], num_images)
+  M = image.shape[1]
+  N = image.shape[2]
+  imagex = np.squeeze(image[idxs, :, :, :])
+  print imagex.shape
+  return imagex
+
+
 
 def plot_confusion_matrix(cm, classes,
                           normalize=False,
@@ -51,10 +91,18 @@ def plot_confusion_matrix(cm, classes,
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
 
+def load_images(filename):
+  """
+  Loads images contained in hdfs file
+  """
+  h5f2 = h5py.File(filename, 'r')
+  X_test_images = h5f2['X']
+  Y_test_labels = h5f2['Y']
+  return X_test_images, Y_test_labels
 
-h5f2 = h5py.File('../data/test.h5', 'r')
-X_test_images = h5f2['X']
-Y_test_labels = h5f2['Y']
+
+hdfs_file = '../data/test.h5'
+X_test_images, Y_test_labels = load_images(hdfs_file)
 
 ## Model definition
 convnet  = CNNModel()
@@ -76,7 +124,7 @@ label_predictions[np.arange(len(predictions)), predictions.argmax(1)] = 1
 fpr, tpr, thresholds = roc_curve(Y_test_labels[:,1], predictions[:,1], pos_label=1)
 roc_auc = auc(fpr, tpr)
 cm = confusion_matrix(Y_test_labels[:,1], label_predictions[:,1])
-print Y_test_labels[:,1].sum(), label_predictions[:,1].sum()
+print Y_test_labels[:,1].shape, label_predictions[:,1].shape
 TN = cm[0][0]
 FP = cm[0][1]
 FN = cm[1][0]
@@ -112,11 +160,46 @@ plot_confusion_matrix(cm, classes=['no-nodule', 'nodule'],
                       title='Confusion matrix')
 plt.savefig('confusion_matrix.png', bbox_inches='tight')
 
-plt.show()
+#plt.show()
 
 
+# Plot all inputs representing True Positives, FP, FN, TN
+TP_images = X_test_images[(Y_test_labels[:,1] == 1) & (label_predictions[:,1] == 1), :,:,:]
+FP_images = X_test_images[(Y_test_labels[:,1] == 0) & (label_predictions[:,1] == 1), :,:,:]
+TN_images = X_test_images[(Y_test_labels[:,1] == 0) & (label_predictions[:,1] == 0), :,:,:]
+FN_images = X_test_images[(Y_test_labels[:,1] == 1) & (label_predictions[:,1] == 0), :,:,:]
 
+## Choose 16 images randomly
+imagex = format_image(TP_images, 4)
+mosaic = create_mosaic(imagex, 2, 2)
+plt.figure(figsize = (12, 12))
+plt.imshow(mosaic, cmap = 'gray')
+plt.axis('off')
+plt.savefig('preds_tps' + '.png', bbox_inches='tight')
 
+## Choose 16 images randomly
+imagex = format_image(FP_images, 4)
+mosaic = create_mosaic(imagex, 2, 2)
+plt.figure(figsize = (12, 12))
+plt.imshow(mosaic, cmap = 'gray')
+plt.axis('off')
+plt.savefig('preds_fps' + '.png', bbox_inches='tight')
+
+## Choose 16 images randomly
+imagex = format_image(FN_images, 4)
+mosaic = create_mosaic(imagex, 2, 2)
+plt.figure(figsize = (12, 12))
+plt.imshow(mosaic, cmap = 'gray')
+plt.axis('off')
+plt.savefig('preds_fns' + '.png', bbox_inches='tight')
+
+## Choose 16 images randomly
+imagex = format_image(TN_images, 4)
+mosaic = create_mosaic(imagex, 2, 2)
+plt.figure(figsize = (12, 12))
+plt.imshow(mosaic, cmap = 'gray')
+plt.axis('off')
+plt.savefig('preds_tns' + '.png', bbox_inches='tight')
 
 
 

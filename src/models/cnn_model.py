@@ -149,8 +149,7 @@ class CNNModel(object):
 		if mode == 'testtrain':
 			return self.network
 		if mode == 'visual':
-			return inp_layer, conv_layer_1, mp_layer_1, conv_layer_2, conv_layer_3, mp_layer_2,\
-			fully_connected_layer_1, dropout_layer_1, softmax_layer, self.network
+			return conv_layer_1, conv_layer_2, conv_layer_3, self.network
 
 
 

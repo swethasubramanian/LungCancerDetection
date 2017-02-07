@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 from PIL import Image
 from scipy.ndimage import imread, zoom
 
-
 def create_mosaic(image, nrows, ncols):
 	"""
 	Tiles all the layers in nrows x ncols
@@ -48,13 +47,13 @@ def get_layer_output(layer, model, inp):
 	inp: input image
 
 	"""
-	m2 = tflearn.DNN(layer, session=model.session)
+	m2 = tflearn.DNN(layer, session = model.session)
 	yhat = m2.predict(inp.reshape(-1, inp.shape[0], inp.shape[1], 1))
 	yhat_1 = np.array(yhat[0])
 	return m2, yhat_1
 
 
-def plot_layers(image, idx, pltfilename):
+def plot_layers(image, idx, pltfilename, size = 12, cmapx = 'magma'):
 	"""
 	plot filter output in layers
 
@@ -68,8 +67,8 @@ def plot_layers(image, idx, pltfilename):
 	nfilt = image.shape[-1]
 
 	mosaic = create_mosaic(image, nfilt/4, 4)
-	plt.figure(figsize = (6,6))
-	plt.imshow(mosaic, cmap = 'magma')
+	plt.figure(figsize = (size, size))
+	plt.imshow(mosaic, cmap = cmapx)
 	plt.axis('off')
 	plt.savefig(pltfilename + str(idx)+'.png', bbox_inches='tight')
 	#plt.show()
@@ -92,15 +91,22 @@ def get_weights(m2, layer):
 	 weights.reshape(weights.shape[0], weights.shape[1], weights.shape[-1])
 	return weights
 
+def plot_single_output(image, size = 6):
+	plt.figure(figsize = (size, size))
+	plt.imshow(mosaic, cmap = 'magma')
+	plt.axis('off')
+	plt.savefig('filterout' + '.png', bbox_inches='tight')	
+
+
+
 
 ### Plot layer
-filename = '../data/test/image_14188.jpg'
+filename = '../data/test/image_21351.jpg'
 inp = imread(filename).astype('float32')
 
 
 convnet  = CNNModel()
-inp_layer, conv_layer_1, mp_layer_1, conv_layer_2, conv_layer_3, mp_layer_2,\
-fully_connected_layer_1, dropout_layer_1, softmax_layer, network =\
+conv_layer_1, conv_layer_2, conv_layer_3, network =\
  convnet.define_network(inp.reshape(-1, inp.shape[0], inp.shape[1], 1), 'visual')
 model = tflearn.DNN(network, tensorboard_verbose=0,\
 		 checkpoint_path='nodule3-classifier.tfl.ckpt')
@@ -116,7 +122,7 @@ for idx, layer in enumerate(layers_to_be_plotted):
 	plot_layers(yhat, idx, 'conv_layer_')
 
 weights = get_weights(m2, conv_layer_1)
-plot_layers(weights, 0, 'weight_conv_layer_')
+plot_layers(weights, 0, 'weight_conv_layer_', 6, 'gray')
 
 
 
