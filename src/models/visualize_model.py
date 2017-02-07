@@ -1,5 +1,5 @@
 """
-A script to visualize layers in the conv net model 
+A script to visualize layers and filters in the conv net model 
 """
 
 import tflearn
@@ -10,7 +10,7 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 from PIL import Image
-from scipy.ndimage import imread
+from scipy.ndimage import imread, zoom
 
 
 def create_mosaic(image, nrows, ncols):
@@ -37,32 +37,61 @@ def create_mosaic(image, nrows, ncols):
 	image = image.reshape(M*nrows, N*ncols)
 	return image
 
-def plot_layers(layer, model, inp, idx):
+def get_layer_output(layer, model, inp):
 	"""
-	plot filter output in layers
+	Returns model layer output
 
 	Args
 	----
 	layer: cnn layer
 	model: cnn model
 	inp: input image
-	idx: layer number
+
 	"""
 	m2 = tflearn.DNN(layer, session=model.session)
 	yhat = m2.predict(inp.reshape(-1, inp.shape[0], inp.shape[1], 1))
 	yhat_1 = np.array(yhat[0])
+	return m2, yhat_1
 
-	print yhat_1.shape
 
-	
-	nfilt = yhat_1.shape[2]
+def plot_layers(image, idx, pltfilename):
+	"""
+	plot filter output in layers
 
-	mosaic = create_mosaic(yhat_1, nfilt/4, 4)
-	plt.figure(figsize = (12,12))
+	Args
+	----
+	image: layer output of form M x N x nfilt
+	idx: layer number
+	pltfilename = a string representing filename
+
+	"""
+	nfilt = image.shape[-1]
+
+	mosaic = create_mosaic(image, nfilt/4, 4)
+	plt.figure(figsize = (6,6))
 	plt.imshow(mosaic, cmap = 'magma')
 	plt.axis('off')
-	plt.savefig('conv1_layer_' + str(idx)+'.png', bbox_inches='tight')
+	plt.savefig(pltfilename + str(idx)+'.png', bbox_inches='tight')
 	#plt.show()
+
+def get_weights(m2, layer):
+	"""
+	get a layer's weights
+
+	Args:
+	------
+	m2: model input
+	layer = layer in question
+
+	Returns:
+	weights 
+	"""
+	weights = m2.get_weights(layer.W)
+	print weights.shape
+	weights =\
+	 weights.reshape(weights.shape[0], weights.shape[1], weights.shape[-1])
+	return weights
+
 
 ### Plot layer
 filename = '../data/test/image_14188.jpg'
@@ -78,10 +107,17 @@ model = tflearn.DNN(network, tensorboard_verbose=0,\
 model.load("nodule2-classifier.tfl")
 print model.predict(inp.reshape(-1, 50, 50, 1))
 
+
+
 layers_to_be_plotted = [conv_layer_1, conv_layer_2, conv_layer_3]
 #plot_layers(conv_layer_1, model, inp)
 for idx, layer in enumerate(layers_to_be_plotted):
-	plot_layers(layer, model, inp, idx)
+	m2, yhat = get_layer_output(layer, model, inp)
+	plot_layers(yhat, idx, 'conv_layer_')
+
+weights = get_weights(m2, conv_layer_1)
+plot_layers(weights, 0, 'weight_conv_layer_')
+
 
 
 
