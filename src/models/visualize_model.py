@@ -99,30 +99,33 @@ def plot_single_output(image, size = 6):
 
 
 
-
-### Plot layer
-filename = '../data/test/image_21351.jpg'
-inp = imread(filename).astype('float32')
-
-
-convnet  = CNNModel()
-conv_layer_1, conv_layer_2, conv_layer_3, network =\
- convnet.define_network(inp.reshape(-1, inp.shape[0], inp.shape[1], 1), 'visual')
-model = tflearn.DNN(network, tensorboard_verbose=0,\
-		 checkpoint_path='nodule3-classifier.tfl.ckpt')
-model.load("nodule2-classifier.tfl")
-print model.predict(inp.reshape(-1, 50, 50, 1))
+def main():
+	### Plot layer
+	filename = '../data/test/image_21351.jpg'
+	inp = imread(filename).astype('float32')
 
 
+	convnet  = CNNModel()
+	conv_layer_1, conv_layer_2, conv_layer_3, network =\
+	 convnet.define_network(inp.reshape(-1, inp.shape[0], inp.shape[1], 1), 'visual')
+	model = tflearn.DNN(network, tensorboard_verbose=0,\
+			 checkpoint_path='nodule3-classifier.tfl.ckpt')
+	model.load("nodule3-classifier.tfl")
+	print model.predict(inp.reshape(-1, 50, 50, 1))
 
-layers_to_be_plotted = [conv_layer_1, conv_layer_2, conv_layer_3]
-#plot_layers(conv_layer_1, model, inp)
-for idx, layer in enumerate(layers_to_be_plotted):
-	m2, yhat = get_layer_output(layer, model, inp)
-	plot_layers(yhat, idx, 'conv_layer_')
 
-weights = get_weights(m2, conv_layer_1)
-plot_layers(weights, 0, 'weight_conv_layer_', 6, 'gray')
+
+	layers_to_be_plotted = [conv_layer_1, conv_layer_2, conv_layer_3]
+	#plot_layers(conv_layer_1, model, inp)
+	for idx, layer in enumerate(layers_to_be_plotted):
+		m2, yhat = get_layer_output(layer, model, inp)
+		plot_layers(yhat, idx, 'conv_layer_')
+
+	weights = get_weights(m2, conv_layer_1)
+	plot_layers(weights, 0, 'weight_conv_layer_', 6, 'gray')
+
+if __name__ == "__main__":
+	main()
 
 
 

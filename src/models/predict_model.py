@@ -16,7 +16,7 @@ import itertools
 
 import matplotlib.pyplot as plt
 
-#from visualize_model import create_mosaic, plot_layers
+hdfs_file = '../data/test.h5'
 
 def create_mosaic(image, nrows, ncols):
   """
@@ -100,106 +100,139 @@ def load_images(filename):
   Y_test_labels = h5f2['Y']
   return X_test_images, Y_test_labels
 
+def plot_predictions(images, filename):
+  """
+  Plots the predictions mosaic
+  """
+  imagex = format_image(images, 4)
+  mosaic = create_mosaic(imagex, 2, 2)
+  plt.figure(figsize = (12, 12))
+  plt.imshow(mosaic, cmap = 'gray')
+  plt.axis('off')
+  plt.savefig(filename + '.png', bbox_inches='tight')
 
-hdfs_file = '../data/test.h5'
-X_test_images, Y_test_labels = load_images(hdfs_file)
+def get_predictions(X_test_images, Y_test_labels):
+  """
+  Args:
+  ------
+  Given hdfs file of X_test_images and Y_test_labels
+  
+  returns:
+  --------
+  predictions: probability values for each class 
+  label_predictions: returns predicted classes
+  """
 
-## Model definition
-convnet  = CNNModel()
-network = convnet.define_network(X_test_images)
-model = tflearn.DNN(network, tensorboard_verbose=0,\
-		 checkpoint_path='nodule3-classifier.tfl.ckpt')
-model.load("nodule2-classifier.tfl")
+  ## Model definition
+  convnet  = CNNModel()
+  network = convnet.define_network(X_test_images)
+  model = tflearn.DNN(network, tensorboard_verbose=0,\
+  		 checkpoint_path='nodule3-classifier.tfl.ckpt')
+  model.load("nodule3-classifier.tfl")
 
-#convnet.define_model()
-#predictions, score = convnet.predict_results(X_test_images, Y_test_labels)
+  predictions = np.vstack(model.predict(X_test_images[:,:,:,:]))
+  #label_predictions = np.vstack(model.predict_label(X_test_images[:,:,:,:]))
+  score = model.evaluate(X_test_images, Y_test_labels)
+  label_predictions = np.zeros_like(predictions)
+  label_predictions[np.arange(len(predictions)), predictions.argmax(1)] = 1
+  return predictions, label_predictions
 
-predictions = np.vstack(model.predict(X_test_images[:,:,:,:]))
-#label_predictions = np.vstack(model.predict_label(X_test_images[:,:,:,:]))
-score = model.evaluate(X_test_images, Y_test_labels)
-label_predictions = np.zeros_like(predictions)
-label_predictions[np.arange(len(predictions)), predictions.argmax(1)] = 1
-
-## ROC
-fpr, tpr, thresholds = roc_curve(Y_test_labels[:,1], predictions[:,1], pos_label=1)
-roc_auc = auc(fpr, tpr)
-cm = confusion_matrix(Y_test_labels[:,1], label_predictions[:,1])
-print Y_test_labels[:,1].shape, label_predictions[:,1].shape
-TN = cm[0][0]
-FP = cm[0][1]
-FN = cm[1][0]
-TP = cm[1][1]
-
-precision = TP*1.0/(TP+FP)
-recall = TP*1.0/(TP+FN)
-specificity = TN*1.0/(TN+FP)
-
-print precision, recall, specificity
-print TP, FP, FN, TN
-
-
-plt.figure()
-lw = 2
-plt.plot(fpr, tpr, color='darkorange',
-         lw=lw, label='(AUC = %0.2f)' % roc_auc)
-plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
-#plt.xlim([0.0, 1.0])
-#plt.ylim([0.0, 1.0])
-#plt.axis('tight')
-plt.axis('equal')
-#plt.axis([0, 1, 0, 1])
-plt.xlabel('False Positive Rate')
-plt.ylabel('True Positive Rate')
-plt.legend(loc="lower right")
-plt.savefig('roc1.png', bbox_inches='tight')
-
-
-# Plot non-normalized confusion matrix
-plt.figure()
-plot_confusion_matrix(cm, classes=['no-nodule', 'nodule'],
-                      title='Confusion matrix')
-plt.savefig('confusion_matrix.png', bbox_inches='tight')
-
-#plt.show()
+def get_roc_curve(Y_test_labels, predictions):
+  """
+  Args:
+  -------
+  hdfs datasets: Y_test_labels and predictions
+  
+  Returns:
+  --------
+  fpr: false positive Rate
+  tpr: true posiive Rate
+  roc_auc: area under the curve value
+  """
+  fpr, tpr, thresholds = roc_curve(Y_test_labels[:,1], predictions[:,1], pos_label=1)
+  roc_auc = auc(fpr, tpr)
+  return fpr, tpr, roc_auc
 
 
-# Plot all inputs representing True Positives, FP, FN, TN
-TP_images = X_test_images[(Y_test_labels[:,1] == 1) & (label_predictions[:,1] == 1), :,:,:]
-FP_images = X_test_images[(Y_test_labels[:,1] == 0) & (label_predictions[:,1] == 1), :,:,:]
-TN_images = X_test_images[(Y_test_labels[:,1] == 0) & (label_predictions[:,1] == 0), :,:,:]
-FN_images = X_test_images[(Y_test_labels[:,1] == 1) & (label_predictions[:,1] == 0), :,:,:]
+def get_metrics(Y_test_labels, label_predictions):
+  """
+  Args:
+  -----
+  Y_test_labels, label_predictions
 
-## Choose 16 images randomly
-imagex = format_image(TP_images, 4)
-mosaic = create_mosaic(imagex, 2, 2)
-plt.figure(figsize = (12, 12))
-plt.imshow(mosaic, cmap = 'gray')
-plt.axis('off')
-plt.savefig('preds_tps' + '.png', bbox_inches='tight')
+  Returns:
+  --------
+  precision, recall and specificity values and cm
+  """
+  cm = confusion_matrix(Y_test_labels[:,1], label_predictions[:,1])
 
-## Choose 16 images randomly
-imagex = format_image(FP_images, 4)
-mosaic = create_mosaic(imagex, 2, 2)
-plt.figure(figsize = (12, 12))
-plt.imshow(mosaic, cmap = 'gray')
-plt.axis('off')
-plt.savefig('preds_fps' + '.png', bbox_inches='tight')
+  TN = cm[0][0]
+  FP = cm[0][1]
+  FN = cm[1][0]
+  TP = cm[1][1]
 
-## Choose 16 images randomly
-imagex = format_image(FN_images, 4)
-mosaic = create_mosaic(imagex, 2, 2)
-plt.figure(figsize = (12, 12))
-plt.imshow(mosaic, cmap = 'gray')
-plt.axis('off')
-plt.savefig('preds_fns' + '.png', bbox_inches='tight')
+  precision = TP*1.0/(TP+FP)
+  recall = TP*1.0/(TP+FN)
+  specificity = TN*1.0/(TN+FP)
 
-## Choose 16 images randomly
-imagex = format_image(TN_images, 4)
-mosaic = create_mosaic(imagex, 2, 2)
-plt.figure(figsize = (12, 12))
-plt.imshow(mosaic, cmap = 'gray')
-plt.axis('off')
-plt.savefig('preds_tns' + '.png', bbox_inches='tight')
+  return precision, recall, specificity, cm
+
+def plot_roc_curve(fpr, tpr, roc_auc):
+  """
+  Plots ROC curve
+
+  Args:
+  -----
+  FPR, TPR and AUC
+  """
+  plt.figure()
+  lw = 2
+  plt.plot(fpr, tpr, color='darkorange',
+    lw=lw, label='(AUC = %0.2f)' % roc_auc)
+  plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+  plt.axis('equal')
+  plt.xlabel('False Positive Rate')
+  plt.ylabel('True Positive Rate')
+  plt.legend(loc="lower right")
+  plt.savefig('roc1.png', bbox_inches='tight')
+
+
+def main():
+  X_test_images, Y_test_labels = load_images(hdfs_file)
+
+  predictions, label_predictions = \
+  get_predictions(X_test_images, Y_test_labels)
+
+  fpr, tpr, roc_auc = get_roc_curve(Y_test_labels, predictions)
+  plot_roc_curve(fpr, tpr, roc_auc)
+
+  precision, recall, specificity, cm =\
+   get_metrics(Y_test_labels, label_predictions)
+
+  print precision, recall, specificity 
+
+  # Plot non-normalized confusion matrix
+  plt.figure()
+  plot_confusion_matrix(cm, classes=['no-nodule', 'nodule'], \
+    title='Confusion matrix')
+  plt.savefig('confusion_matrix.png', bbox_inches='tight')
+
+  # Plot all inputs representing True Positives, FP, FN, TN
+  TP_images = X_test_images[(Y_test_labels[:,1] == 1) & (label_predictions[:,1] == 1), :,:,:]
+  FP_images = X_test_images[(Y_test_labels[:,1] == 0) & (label_predictions[:,1] == 1), :,:,:]
+  TN_images = X_test_images[(Y_test_labels[:,1] == 0) & (label_predictions[:,1] == 0), :,:,:]
+  FN_images = X_test_images[(Y_test_labels[:,1] == 1) & (label_predictions[:,1] == 0), :,:,:]
+
+  ## Choose 16 images randomly
+  plot_predictions(TP_images, 'preds_tps')
+  plot_predictions(TN_images, 'preds_tns')
+  plot_predictions(FN_images, 'preds_fns')
+  plot_predictions(FP_images, 'preds_fps')
+
+if __name__ == "__main__":
+  main()
+
+
 
 
 
