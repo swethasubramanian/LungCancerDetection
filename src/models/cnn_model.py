@@ -134,13 +134,13 @@ class CNNModel(object):
 
 		"""
 		inp_layer = self.input_layer(X_images, name = 'inpu1')
-		conv_layer_1 = self.convolution_layer(32, 3, 'conv1', 'relu', 'L2') # 50 filters, with size 3
+		conv_layer_1 = self.convolution_layer(32, 5, 'conv1', 'relu', 'L2') # 50 filters, with size 3
 		mp_layer_1 = self.max_pooling_layer(2, 'mp1') # downsamples spatial size by 2
-		conv_layer_2 = self.convolution_layer(64, 3, 'conv2', 'relu', 'L2')
+		conv_layer_2 = self.convolution_layer(64, 5, 'conv2', 'relu', 'L2')
 		conv_layer_3 = self.convolution_layer(64, 3, 'conv3', 'relu', 'L2')
 		mp_layer_2 = self.max_pooling_layer(2, 'mp2')
 		fully_connected_layer_1 = self.fully_connected_layer(512,'relu', 'fl1')
-		dropout_layer_1 = self.dropout_layer('dp1', 0.6)
+		dropout_layer_1 = self.dropout_layer('dp1', 0.5)
 		softmax_layer  = self.fully_connected_layer(2, 'softmax', 'fl2')
 
 		self.network = regression(self.network, optimizer = 'adam',\
