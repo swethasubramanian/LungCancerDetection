@@ -22,6 +22,7 @@ else:
 inpfile = mode + 'data'
 outDir = mode + '/image_'
 X_data = pd.read_pickle(inpfile)
+raw_image_path = '../../data/raw/*/'
 
 def create_data(idx, outDir, width = 50):
 	'''
@@ -30,7 +31,7 @@ def create_data(idx, outDir, width = 50):
 	width (int) specify image size
 	'''
 	scan = CTScan(np.asarray(X_data.loc[idx])[0], \
-		np.asarray(X_data.loc[idx])[1:])
+		np.asarray(X_data.loc[idx])[1:], raw_image_path)
 	outfile = outDir  +  str(idx)+ '.jpg'
 	scan.save_image(outfile, width)
 
