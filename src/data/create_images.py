@@ -10,7 +10,6 @@ where mode can be 'test', 'train', 'val'
 import sys
 
 from joblib import Parallel, delayed
-import multiprocessing
 
 import pickle
 
@@ -68,30 +67,12 @@ class CTScan(object):
         self.ds = sitk.ReadImage(path[0])
         self.image = sitk.GetArrayFromImage(self.ds)
 
-    def get_resolution(self):
-        """
-        Gets resolution of CT images in mm
-        """
-        return self.ds.GetSpacing()
-
-    def get_origin(self):
-        """
-        Gets the origin of defined coordinates
-        """
-        return self.ds.GetOrigin()
-
-    def get_ds(self):
-        """
-        Returns the data strcuture containing resolution and coordinate info
-        """
-        return self.ds
-
     def get_voxel_coords(self):
         """
         Converts cartesian to voxel coordinates
         """
-        origin = self.get_origin()
-        resolution = self.get_resolution()
+        origin = self.ds.GetOrigin()
+        resolution = self.ds.GetSpacing()
         voxel_coords = [np.absolute(self.coords[j]-origin[j])/resolution[j] \
             for j in range(len(self.coords))]
         return tuple(voxel_coords)
