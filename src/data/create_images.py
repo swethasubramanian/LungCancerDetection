@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+"""
+Builds image data base as test, train, validatation datasets
+Run script as python create_images.py $mode
+where mode can be 'test', 'train', 'val'
+
+"""
+
 import sys
 
 from joblib import Parallel, delayed
@@ -15,11 +22,16 @@ import glob
 
 from PIL import Image
 
+from sklearn.cross_validation import train_test_split
+
 import SimpleITK as sitk
+
+raw_image_path = '../../data/raw/*/'
+candidates_file = '../data/candidates.csv'
 
 
 class CTScan(object):
-	"""
+    """
 	A class that allows you to read .mhd header data, crop images and 
 	generate and save cropped images
 
@@ -27,7 +39,6 @@ class CTScan(object):
     filename: .mhd filename
     coords: a numpy array
 	"""
-	
     def __init__(self, filename = None, coords = None, path = None):
         """
         Args
@@ -121,7 +132,7 @@ class CTScan(object):
         Image.fromarray(image*255).convert('L').save(filename)
 
 
-def create_data(idx, outDir, width = 50):
+def create_data(idx, outDir, X_data,  width = 50):
     '''
     Generates your test, train, validation images
     outDir = a string representing destination
@@ -131,6 +142,36 @@ def create_data(idx, outDir, width = 50):
         np.asarray(X_data.loc[idx])[1:], raw_image_path)
     outfile = outDir  +  str(idx)+ '.jpg'
     scan.save_image(outfile, width)
+
+def do_test_train_split(filename):
+    """
+    Does a test train split if not previously done
+
+    """
+    candidates = pd.read_csv(filename)
+
+    positives = candidates[candidates['class']==1].index  
+    negatives = candidates[candidates['class']==0].index
+
+    ## Under Sample Negative Indexes
+    np.random.seed(42)
+    negIndexes = np.random.choice(negatives, len(positives)*5, replace = False)
+
+    candidatesDf = candidates.iloc[list(positives)+list(negIndexes)]
+
+    X = candidatesDf.iloc[:,:-1]
+    y = candidatesDf.iloc[:,-1]
+    X_train, X_test, y_train, y_test = train_test_split(X, y,\
+     test_size = 0.20, random_state = 42)
+    X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, \
+        test_size = 0.20, random_state = 42)
+
+    X_train.to_pickle('traindata')
+    y_train.to_pickle('trainlabels')
+    X_test.to_pickle('testdata')
+    y_test.to_pickle('testlabels')
+    X_val.to_pickle('valdata')
+    y_val.to_pickle('vallabels')
 
 
 def main():
@@ -142,17 +183,16 @@ def main():
             raise ValueError('Argument not recognized. Has to be train, test or val')
 
     inpfile = mode + 'data'
-    outDir = mode + '/image_'
-    X_data = pd.read_pickle(inpfile)
-    raw_image_path = '../../data/raw/*/'
+    outDir = mode + '2/image_'
 
-    # Parallelizes inorder to generate more than one image at a time
-    Parallel(n_jobs = 3)(delayed(create_data)(idx, outDir) for idx in X_data.index)
+    if os.path.isfile(inpfile):
+        pass
+    else:
+        do_test_train_split(candidates_file)
+    X_data = pd.read_pickle(inpfile)
+    Parallel(n_jobs = 3)(delayed(create_data)(idx, outDir, X_data) for idx in X_data.index)
 
 if __name__ == "__main__":
     main()
-
-
-
 
         
