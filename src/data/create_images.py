@@ -183,7 +183,7 @@ def main():
             raise ValueError('Argument not recognized. Has to be train, test or val')
 
     inpfile = mode + 'data'
-    outDir = mode + '2/image_'
+    outDir = mode + '/image_'
 
     if os.path.isfile(inpfile):
         pass
