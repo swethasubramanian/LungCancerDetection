@@ -11,11 +11,11 @@ However, deep learning could be ideal solution because these algorithms are able
 
 One challenge in implementing these algorithms is the scarcity of labeled medical image data. While this is a limitation for all applications of deep learning, it is more so for medical image data because of patient confidentiality concerns.
 
-In this post you  will learn how to build a convolutional neural network, train it, and have it detect lung nodules. I used the data from the Lung Image Database Consortium and Infectious Disease Research Institute [(LIDC/IDRI) data base] (https://wiki.cancerimagingarchive.net/display/Public/LIDC-IDRI). As these images were huge (124 GB), I ended up using reformatted version available for [LUNA16](https://luna16.grand-challenge.org/data/). This dataset consisted of 888 CT scans with annotations describing coordinates and ground truth labels. First step was to create a image database for training.
+In this post you  will learn how to build a convolutional neural network, train it, and have it detect lung nodules. I used the data from the Lung Image Database Consortium and Infectious Disease Research Institute [(LIDC/IDRI) data base](https://wiki.cancerimagingarchive.net/display/Public/LIDC-IDRI). As these images were huge (124 GB), I ended up using reformatted version available for [LUNA16](https://luna16.grand-challenge.org/data/). This dataset consisted of 888 CT scans with annotations describing coordinates and ground truth labels. First step was to create a image database for training.
 
 ### Creating an image database
 
-The images were formatted as .mhd and .raw files. The header data is contained in .mhd files and multidimensional image data is stored in .raw files. I used [SimpleITK](http://www.simpleitk.org/) library to read the .mhd files. Each CT scan has dimensions of 512 x 512 x n, where n is the number of axial scans. There are about 200 images in each CT scan. 
+The images were formatted as `.mhd` and `.raw` files. The header data is contained in `.mhd` files and multidimensional image data is stored in `.raw` files. I used [SimpleITK](http://www.simpleitk.org/) library to read the `.mhd` files. Each CT scan has dimensions of 512 x 512 x n, where n is the number of axial scans. There are about 200 images in each CT scan. 
 
 There were a total of 551065 annotations. Of all the annotations provided, 1351 were labeled as nodules, rest were labeled negative. So there big class imbalance. The easy way to deal with it to under sample the majority class and augment the minority class through rotating images. 
 
